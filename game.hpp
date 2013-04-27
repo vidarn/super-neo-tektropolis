@@ -5,6 +5,7 @@
 #include <SFML/Graphics.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include "level.hpp"
+#include "sprite_factory.hpp"
 
 class Game {
     public:
@@ -23,6 +24,7 @@ class Game {
         sf::Clock m_clock;
         Level *m_level;
         boost::random::mt19937 *m_rng;
+        SpriteFactory *m_spriteFactory;
 };
 
 #endif /* end of include guard: GAME_76B6OLNJ */

@@ -3,13 +3,15 @@
 #include "level.hpp"
 #include "common.hpp"
 #include "obstacle.hpp"
+#include "decoration.hpp"
 
-Level::Level(boost::random::mt19937 *rng):
-	m_rng(rng)
+Level::Level(boost::random::mt19937 *rng, SpriteFactory *spriteFactory, sf::RenderWindow &window):
+	m_rng(rng), m_spriteFactory(spriteFactory)
 {
-	b2Vec2 gravity(0.0f, 70.0f);
+	b2Vec2 gravity(0.0f, 55.0f);
 	m_world = new b2World(gravity);
 	generate();
+	m_camera = new Camera(m_player, window);
 }
 
 Level::~Level()
@@ -18,6 +20,7 @@ Level::~Level()
         delete actor;
     }
 	delete m_world;
+	delete m_camera;
 }
 
 void 
@@ -30,7 +33,7 @@ void
 Level::draw(sf::RenderWindow &window)
 {
     BOOST_FOREACH(Actor *actor, m_actors){
-		actor->draw(window);
+		actor->draw(m_camera);
 	}
 }
 
@@ -52,18 +55,24 @@ Level::update(float dt)
     int32 velocityIterations = 8;
     int32 positionIterations = 3;
 	m_world->Step(dt, velocityIterations, positionIterations);
+	m_camera->update(dt);
 }
 
 void
 Level::generate()
 {
-	for(int a=0;a<30;a++){
-		int x = boost::random::uniform_int_distribution<>(1,700)(*m_rng);
-		int y = boost::random::uniform_int_distribution<>(40,500)(*m_rng);
-		addActor(new Obstacle(x,y,60,30,*m_world));
+	for(int a=0;a<5;a++){
+		int x = boost::random::uniform_int_distribution<>(1,350)(*m_rng);
+		int y = boost::random::uniform_int_distribution<>(40,250)(*m_rng);
+		addActor(new Decoration(x,y,85,30,*m_world,m_spriteFactory,"cloud",m_rng));
+	}
+	for(int a=0;a<5;a++){
+		int x = boost::random::uniform_int_distribution<>(1,350)(*m_rng);
+		int y = boost::random::uniform_int_distribution<>(40,250)(*m_rng);
+		addActor(new Obstacle(x,y,85,30,*m_world,m_spriteFactory,m_rng));
 		if( a == 0){
 			y -= 42;
-			m_player = new Player(x,y,20,40,*m_world);
+			m_player = new Player(x,y,15,39,*m_world,m_spriteFactory,m_rng);
 			addActor(m_player);
 		}
 	}

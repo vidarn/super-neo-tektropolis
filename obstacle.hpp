@@ -4,7 +4,7 @@
 
 class Obstacle : public Actor{
 	public:
-		Obstacle (int x, int y, int w, int h, b2World &world);
+		Obstacle (int x, int y, int w, int h, b2World &world, SpriteFactory *spriteFactory, boost::random::mt19937 *rng);
 		virtual ~Obstacle ();
 };
 

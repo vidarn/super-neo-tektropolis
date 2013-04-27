@@ -6,6 +6,7 @@ Game::Game(const std::string &title, int w, int h):
 {
     m_window = new sf::RenderWindow(sf::VideoMode(w, h), title, sf::Style::Close);
     m_rng = new boost::random::mt19937();
+    m_spriteFactory = new SpriteFactory();
 }
 
 Game::~Game()
@@ -33,7 +34,7 @@ Game::run()
 void
 Game::draw()
 {
-    m_window->clear();
+    m_window->clear(sf::Color(59,134,134));
     m_level->draw(*m_window);
     m_window->display();
 }
@@ -71,7 +72,7 @@ Game::input()
 void
 Game::start()
 {
-    m_level = new Level(m_rng);
+    m_level = new Level(m_rng, m_spriteFactory, *m_window);
 }
 
 void
