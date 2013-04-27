@@ -11,6 +11,9 @@ class Player : public Actor {
 	private:
 		bool m_walkingRight;
 		bool m_walkingLeft;
+		bool m_beginJump;
+		bool m_jumpPressed;
+		bool m_onGround;
 };
 
 #endif /* end of include guard: PLAYER_52X2JIYU */

@@ -1,8 +1,13 @@
+#include <iostream>
 #include "player.hpp"
+#include "common.hpp"
 
 Player::Player(int x, int y, int w, int h, b2World &world):
 	Actor(x,y,w,h,ACTOR_DYNAMIC,world)
 {
+	m_walkingLeft = m_walkingRight = false;
+	m_jumpPressed = m_beginJump = false;
+	m_onGround    = false;
 }
 
 Player::~Player()
@@ -19,7 +24,11 @@ Player::buttonPressed(const std::string &command)
 	if(command == "right"){
 		m_walkingRight = true;
 	}
-	if(command == "jump"){
+	if(command == "start jump"){
+		m_beginJump = true;
+	}
+	if(command == "keep jump"){
+		m_jumpPressed = true;
 	}
 	if(command == "shoot"){
 	}
@@ -36,6 +45,14 @@ Player::update(float dt)
 	if(m_walkingRight){
 		vel.x += 10;
 	}
+	if(vel.y < 0.0f && ! m_jumpPressed){
+		vel.y *= 0.2f;
+	}
     m_body->SetLinearVelocity(vel);
+	m_onGround = feetOnGround();
+	if(m_beginJump && m_onGround){
+        m_body->ApplyLinearImpulse(b2Vec2(0.0f,-5.0f), m_body->GetPosition());
+	}
+	m_jumpPressed = m_beginJump = false;
 	m_walkingLeft = m_walkingRight = false;
 }

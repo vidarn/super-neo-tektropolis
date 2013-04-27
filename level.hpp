@@ -14,6 +14,7 @@ class Level {
         void addActor(Actor *actor);
 		void draw(sf::RenderWindow &window);
 		void update(float dt);
+		void keyPressed(int key);
 	private:
 		void generate();
         std::vector<Actor *> m_actors;

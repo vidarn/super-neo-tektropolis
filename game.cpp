@@ -53,13 +53,15 @@ Game::input()
          if (event.type == sf::Event::Closed)
              m_window->close();
          if (event.type == sf::Event::KeyPressed){
+             bool handled = false;
              switch(event.key.code){
-                 case sf::Keyboard::J:
-                     std::cout << "J!" << std::endl;
-                     break;
                  case sf::Keyboard::R:
                      restart();
+                     handled = true;
                      break;
+             }
+             if(!handled){
+                 m_level->keyPressed(event.key.code);
              }
          }
     }

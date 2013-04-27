@@ -7,7 +7,7 @@
 Level::Level(boost::random::mt19937 *rng):
 	m_rng(rng)
 {
-	b2Vec2 gravity(0.0f, 20.0f);
+	b2Vec2 gravity(0.0f, 70.0f);
 	m_world = new b2World(gravity);
 	generate();
 }
@@ -43,6 +43,9 @@ Level::update(float dt)
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){
 		m_player->buttonPressed("left");
     }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::J)){
+		m_player->buttonPressed("keep jump");
+    }
     BOOST_FOREACH(Actor *actor, m_actors){
 		actor->update(dt);
 	}
@@ -63,5 +66,15 @@ Level::generate()
 			m_player = new Player(x,y,20,40,*m_world);
 			addActor(m_player);
 		}
+	}
+}
+
+void
+Level::keyPressed(int key)
+{
+	switch(key){
+		case sf::Keyboard::J:
+			m_player->buttonPressed("start jump");
+			break;
 	}
 }
