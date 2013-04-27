@@ -3,6 +3,7 @@
 #include <string>
 #include <SFML/System/Clock.hpp>
 #include <SFML/Graphics.hpp>
+#include <boost/random/mersenne_twister.hpp>
 #include "level.hpp"
 
 class Game {
@@ -21,6 +22,7 @@ class Game {
         sf::RenderWindow *m_window;
         sf::Clock m_clock;
         Level *m_level;
+        boost::random::mt19937 *m_rng;
 };
 
 #endif /* end of include guard: GAME_76B6OLNJ */

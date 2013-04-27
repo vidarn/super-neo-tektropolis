@@ -5,6 +5,7 @@ Game::Game(const std::string &title, int w, int h):
     m_w(w), m_h(h)
 {
     m_window = new sf::RenderWindow(sf::VideoMode(w, h), title, sf::Style::Close);
+    m_rng = new boost::random::mt19937();
 }
 
 Game::~Game()
@@ -68,7 +69,7 @@ Game::input()
 void
 Game::start()
 {
-    m_level = new Level();
+    m_level = new Level(m_rng);
 }
 
 void
