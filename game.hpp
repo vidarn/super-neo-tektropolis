@@ -3,7 +3,7 @@
 #include <string>
 #include <SFML/System/Clock.hpp>
 #include <SFML/Graphics.hpp>
-#include "actor.hpp"
+#include "level.hpp"
 
 class Game {
     public:
@@ -14,11 +14,13 @@ class Game {
         void draw();
         void update(float dt);
         void input();
-        void addActor(Actor *actor);
+        void start();
+        void end();
+        void restart();
         int m_w, m_h;
         sf::RenderWindow *m_window;
         sf::Clock m_clock;
-        std::vector<Actor *> m_actors;
+        Level *m_level;
 };
 
 #endif /* end of include guard: GAME_76B6OLNJ */

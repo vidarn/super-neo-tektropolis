@@ -1,6 +1,5 @@
 #include "game.hpp"
 #include <iostream>
-#include <boost/foreach.hpp>
 
 Game::Game(const std::string &title, int w, int h):
     m_w(w), m_h(h)
@@ -10,14 +9,12 @@ Game::Game(const std::string &title, int w, int h):
 
 Game::~Game()
 {
-    BOOST_FOREACH(Actor *actor, m_actors){
-        delete actor;
-    }
 }
 
 int
 Game::run()
 {
+    start();
     m_clock.restart();
     std::cout << "Hello world" << std::endl;
     while (m_window->isOpen())
@@ -29,18 +26,21 @@ Game::run()
         update(dt);
         draw();
     }
+    end();
 }
 
 void
 Game::draw()
 {
     m_window->clear();
+    m_level->draw(*m_window);
     m_window->display();
 }
 
 void
 Game::update(float dt)
 {
+    m_level->update(dt);
 }
 
 void
@@ -52,14 +52,35 @@ Game::input()
          if (event.type == sf::Event::Closed)
              m_window->close();
          if (event.type == sf::Event::KeyPressed){
-             if(event.key.code == sf::Keyboard::J)
-                 std::cout << "J!" << std::endl;
+             switch(event.key.code){
+                 case sf::Keyboard::J:
+                     std::cout << "J!" << std::endl;
+                     break;
+                 case sf::Keyboard::R:
+                     restart();
+                     break;
+             }
          }
     }
 }
 
-void 
-Game::addActor(Actor *actor)
+
+void
+Game::start()
 {
-    m_actors.push_back(actor);
+    m_level = new Level();
 }
+
+void
+Game::end()
+{
+    delete m_level;
+}
+
+void
+Game::restart()
+{
+    end();
+    start();
+}
+
