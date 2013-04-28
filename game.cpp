@@ -1,11 +1,12 @@
-#include "game.hpp"
 #include <iostream>
+#include "game.hpp"
 
 Game::Game(const std::string &title, int w, int h):
     m_w(w), m_h(h)
 {
     m_window = new sf::RenderWindow(sf::VideoMode(w, h), title, sf::Style::Close);
     m_rng = new boost::random::mt19937();
+    m_rng->seed(std::time(0));
     m_spriteFactory = new SpriteFactory();
 }
 

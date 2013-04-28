@@ -9,6 +9,14 @@
 #include "player.hpp"
 #include "sprite_factory.hpp"
 
+class ObstacleIntersectionCallback: public b2QueryCallback {
+    public:
+        ObstacleIntersectionCallback(Actor *ignore);
+        bool ReportFixture(b2Fixture *fixture);
+        bool m_empty;
+        Actor *m_ignore;
+};
+
 class Level {
 	public:
 		Level(boost::random::mt19937 *rng, SpriteFactory *spriteFactory, sf::RenderWindow &window);
@@ -17,6 +25,7 @@ class Level {
 		void draw(sf::RenderWindow &window);
 		void update(float dt);
 		void keyPressed(int key);
+		Actor *getPlayer();
 	private:
 		void generate();
 		void cleanUpActors();

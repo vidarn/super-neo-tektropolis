@@ -180,7 +180,6 @@ Player::setCamera(Camera *camera)
 void
 Player::collide(Actor * actor)
 {
-	std::cout << "Collide!" << std::endl;
 	if(actor->m_deadly){
 		m_dead = true;
 	}

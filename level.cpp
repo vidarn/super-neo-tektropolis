@@ -1,10 +1,12 @@
 #include <boost/foreach.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
+#include <boost/random/discrete_distribution.hpp>
 #include "level.hpp"
 #include "common.hpp"
 #include "obstacle.hpp"
 #include "decoration.hpp"
 #include "enemy.hpp"
+#include "flying_enemy.hpp"
 
 Level::Level(boost::random::mt19937 *rng, SpriteFactory *spriteFactory, sf::RenderWindow &window):
 	m_rng(rng), m_spriteFactory(spriteFactory), m_valid(true)
@@ -77,19 +79,64 @@ Level::update(float dt)
 void
 Level::generate()
 {
-	for(int a=0;a<35;a++){
+	for(int a=0;a<100;a++){
 		int x = boost::random::uniform_int_distribution<>(1,450)(*m_rng);
 		int y = boost::random::uniform_int_distribution<>(40,2050)(*m_rng);
-		addActor(new Obstacle(x,y,85,30,*m_world,m_spriteFactory,m_rng, this));
-		if( a == 0){
-			y -= 42;
-			m_player = new Player(x,y,15,39,*m_world,m_spriteFactory,m_rng, this);
-			addActor(m_player);
+        int w = 1;
+        int h = 1;
+		double obstacleProbs[] = {
+			0.3, 0.7
+		};
+		int obstacleType = boost::random::discrete_distribution<>(obstacleProbs)(*m_rng);
+        Actor *obstacle;
+		switch(obstacleType){
+			case 0:
+                w = 85;
+                h = 30;
+				obstacle = new Obstacle(x,y,w,h,*m_world,m_spriteFactory,m_rng, this, "medium");
+				break;
+			case 1:
+                w = 160;
+                h = 30;
+				obstacle = new Obstacle(x,y,w,h,*m_world,m_spriteFactory,m_rng, this, "large");
+				break;
 		}
-		else{
-			y -= 40;
-			addActor(new Enemy(x,y,17,37,*m_world,m_spriteFactory,m_rng, this));
-		}
+        ObstacleIntersectionCallback callback(obstacle);
+        b2Vec2 tmp;
+        b2AABB bb = obstacle->getFixture()->GetAABB(0);
+        bb.lowerBound.y -= screenToWorld(h);
+        m_world->QueryAABB(&callback, bb);
+        if(callback.m_empty){
+            addActor(obstacle);
+            if( a == 0){
+                y -= 42;
+                m_player = new Player(x,y,15,39,*m_world,m_spriteFactory,m_rng, this);
+                addActor(m_player);
+            }
+            else{
+                y -= 40;
+				double enemyProbs[] = {
+					0.0, 0.6, 0.4
+				};
+				int enemyType = boost::random::discrete_distribution<>(enemyProbs)(*m_rng);
+				Actor *enemy = 0;
+				switch(enemyType){
+					case 1:
+						x += boost::random::uniform_int_distribution<>(-w*0.5,w*0.5)(*m_rng);
+						enemy = new Enemy(x,y,17,37,*m_world,m_spriteFactory,m_rng, this);
+						break;
+					case 2:
+						enemy = new FlyingEnemy(x,y-40,17,37,*m_world,m_spriteFactory,m_rng, this);
+						break;
+				}
+                if(enemy){
+					addActor(enemy);
+				}
+            }
+        }
+        else{
+            delete obstacle;
+        }
 	}
 	for(int a=0;a<15;a++){
 		int x = boost::random::uniform_int_distribution<>(1,950)(*m_rng);
@@ -111,6 +158,12 @@ Level::keyPressed(int key)
 	}
 }
 
+Actor *
+Level::getPlayer()
+{
+	return m_player;
+}
+
 void
 Level::cleanUpActors()
 {
@@ -130,4 +183,19 @@ Level::cleanUpActors()
 		m_actors.push_back(m_newActors[i]);
 	}
 	m_newActors.clear();
+}
+
+ObstacleIntersectionCallback::ObstacleIntersectionCallback(Actor *ignore):
+    m_empty(true), m_ignore(ignore)
+{
+}
+
+bool
+ObstacleIntersectionCallback::ReportFixture(b2Fixture *fixture)
+{
+    if(static_cast<Actor *>(fixture->GetUserData()) != m_ignore){
+        m_empty = false;
+        return false;
+    }
+    return true;
 }

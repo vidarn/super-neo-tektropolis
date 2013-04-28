@@ -9,13 +9,15 @@ Actor::Actor(int x, int y, int w, int h, int type, b2World &world, SpriteFactory
 	b2BodyDef bodyDef;
 	switch(type){
 		case ACTOR_STATIC:
+		case ACTOR_GHOST:
 			bodyDef.type = b2_staticBody;
 			break;
 		case ACTOR_DYNAMIC:
+		case ACTOR_BULLET:
 			bodyDef.type = b2_dynamicBody;
 			break;
-		case ACTOR_GHOST:
-			bodyDef.type = b2_staticBody;
+		case ACTOR_KINEMATIC:
+			bodyDef.type = b2_kinematicBody;
 			break;
 	}
 	bodyDef.fixedRotation = true;
@@ -28,7 +30,7 @@ Actor::Actor(int x, int y, int w, int h, int type, b2World &world, SpriteFactory
 	fixtureDef.density     = 1.0f;
 	fixtureDef.friction    = 0.0f;
 	fixtureDef.restitution = 0.0f;
-	if(type == ACTOR_GHOST){
+	if(type == ACTOR_GHOST || type == ACTOR_BULLET){
 		fixtureDef.isSensor = true;
 		fixtureDef.filter.categoryBits = 0x002;
 	}
@@ -138,6 +140,12 @@ Actor::getBeamed(){
 void
 Actor::collide(Actor *)
 {
+}
+
+b2Fixture *
+Actor::getFixture()
+{
+	return m_body->GetFixtureList();
 }
 
 FloorFeetCallback::FloorFeetCallback():

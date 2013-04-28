@@ -9,7 +9,9 @@ enum
 {
 	ACTOR_STATIC,
 	ACTOR_GHOST,
-	ACTOR_DYNAMIC
+	ACTOR_DYNAMIC,
+	ACTOR_KINEMATIC,
+	ACTOR_BULLET
 };
 
 class Camera;
@@ -45,13 +47,14 @@ class Actor {
 		void setY(float y);
 		virtual void getBeamed();
 		virtual void collide(Actor *);
+        b2Fixture *getFixture();
+		b2Body*   m_body;
 		bool m_dead;
 		bool m_deadly;
 	protected:
 		void drawActor(Camera *cam, Actor *act);
 		void drawActor(Camera *cam, Actor *act, int x, int y);
 		int m_w, m_h;
-		b2Body*   m_body;
 		b2World  *m_world;
 		Sprite   *m_sprite;
 		Level    *m_level;
