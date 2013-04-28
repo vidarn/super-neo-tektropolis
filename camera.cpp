@@ -1,8 +1,9 @@
 #include <algorithm>
+#include <boost/random/uniform_real.hpp>
 #include "camera.hpp"
 
-Camera::Camera(Actor *target, sf::RenderWindow &window):
-	m_target(target), m_window(window), m_x(0), m_y(0)
+Camera::Camera(Actor *target, sf::RenderWindow &window, boost::random::mt19937 *rng):
+	m_target(target), m_window(window), m_x(0), m_y(0), m_rng(rng), m_shake(0.0f)
 {
 }
 
@@ -24,13 +25,23 @@ Camera::update(float dt)
 	leftBorder  = y - border;
 	rightBorder = y + border;
 	m_y = std::min(rightBorder,std::max(leftBorder,int(m_y)));
+
+	if(m_shake > 0.0f){
+		boost::uniform_real<float> shakeDist(-m_shake,m_shake);
+		m_shakeX = shakeDist(*m_rng);
+		m_shakeY = shakeDist(*m_rng);
+	}
+	else{
+		m_shakeX = 0;
+		m_shakeY = 0;
+	}
 }
 
 void
 Camera::draw(sf::Sprite *sprite, int x, int y, int layer, int scaling)
 {
-	int offsetX = 200 - m_x;
-	int offsetY = 150 + m_y;
+	int offsetX = 200 - m_x + m_shakeX;
+	int offsetY = 150 + m_y + m_shakeY;
 	if(layer == LAYER_BACKGROUND){
 		offsetX = offsetX*0.5;
 		offsetY = offsetY*0.5;
@@ -39,3 +50,8 @@ Camera::draw(sf::Sprite *sprite, int x, int y, int layer, int scaling)
 	m_window.draw(*sprite);
 }
 
+void
+Camera::setShake(float shake)
+{
+	m_shake = shake;
+}

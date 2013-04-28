@@ -19,12 +19,16 @@ class Level {
 		void keyPressed(int key);
 	private:
 		void generate();
+		void cleanUpActors();
         std::vector<Actor *> m_actors;
+        std::vector<Actor *> m_newActors;
 		Player *m_player;
 		b2World *m_world;
 		boost::random::mt19937 *m_rng;
 		SpriteFactory *m_spriteFactory;
 		Camera *m_camera;
+		ActorContactListener *m_contactListener;
+		bool m_valid;
 };
 
 #endif /* end of include guard: LEVEL_ZR61NK6F */

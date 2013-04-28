@@ -4,7 +4,7 @@
 
 class Decoration: public Actor{
 public:
-	Decoration (int x, int y, int w, int h, b2World &world, SpriteFactory *spriteFactory, const std::string &name, boost::random::mt19937 *rng);
+	Decoration (int x, int y, int w, int h, b2World &world, SpriteFactory *spriteFactory, const std::string &name, boost::random::mt19937 *rng, Level *level);
 	virtual ~Decoration ();
 
 private:

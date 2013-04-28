@@ -5,7 +5,7 @@
 class Beam: public Actor{
 	public:
 		Beam (int x, int y, int w, int h, b2World &world, SpriteFactory *spriteFactory,
-			boost::random::mt19937 *rng, bool large);
+			boost::random::mt19937 *rng, bool large, Level *level);
 		virtual ~Beam ();
 	private:
 };

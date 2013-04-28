@@ -13,6 +13,7 @@ enum
 };
 
 class Camera;
+class Level;
 
 class FloorFeetCallback : public b2RayCastCallback
 {
@@ -22,20 +23,38 @@ class FloorFeetCallback : public b2RayCastCallback
 		bool m_hit;
 };
 
+class ActorContactListener : public b2ContactListener
+{
+	public:
+		ActorContactListener();
+		void BeginContact(b2Contact * contact);
+		void EndContact(b2Contact * contact);
+};
+
 class Actor {
 	public:
-		Actor(int x, int y, int w, int h, int type, b2World &world, SpriteFactory *spriteFactory, boost::random::mt19937 *rng);
+		Actor(int x, int y, int w, int h, int type, b2World &world, SpriteFactory *spriteFactory, boost::random::mt19937 *rng, Level *level);
 		virtual ~Actor();
-		void draw(Camera *cam);
+		virtual void draw(Camera *cam);
 		virtual void update(float dt);
 		bool feetOnGround();
+		bool feetOnGround(int offset);
 		int getX();
 		int getY();
+		void setX(float x);
+		void setY(float y);
+		virtual void getBeamed();
+		virtual void collide(Actor *);
+		bool m_dead;
+		bool m_deadly;
 	protected:
+		void drawActor(Camera *cam, Actor *act);
+		void drawActor(Camera *cam, Actor *act, int x, int y);
 		int m_w, m_h;
 		b2Body*   m_body;
 		b2World  *m_world;
 		Sprite   *m_sprite;
+		Level    *m_level;
 		SpriteFactory   *m_spriteFactory;
 		boost::random::mt19937 *m_rng;
 };

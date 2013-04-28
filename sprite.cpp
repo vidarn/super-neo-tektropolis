@@ -1,4 +1,5 @@
 #include <boost/foreach.hpp>
+#include <algorithm>
 #include "sprite.hpp"
 #include "camera.hpp"
 
@@ -12,12 +13,12 @@ Sprite::Sprite(std::vector<sf::Texture *> textures)
 		sprite->scale(m_scaling, m_scaling);
 		m_sprites.push_back(sprite);
 	}
-	std::cout << m_sprites.size() << std::endl;
 	m_layer = LAYER_FOREGROUND;
 	m_flipped = false;
 	m_frame = 0;
 	m_frameTime = 0.08;
 	m_t = 0.0f;
+	m_loop = true;
 }
 
 Sprite::~Sprite()
@@ -28,10 +29,8 @@ Sprite::~Sprite()
 }
 
 void
-Sprite::draw(Camera *cam, float x, float y)
+Sprite::draw(Camera *cam, int x, int y)
 {
-	int ix = x + 0.5f;
-	int iy = y + 0.5f;
 	cam->draw(m_sprites[m_frame], x, y, m_layer, m_scaling);
 }
 
@@ -57,9 +56,33 @@ Sprite::update(float dt)
 	m_t += dt;
 	if(m_t > m_frameTime){
 		m_frame += 1;
-		m_frame %= m_sprites.size();
-		if(m_sprites.size() != 1)
-			std::cout << m_sprites.size() << std::endl;
+		if(m_loop){
+			m_frame %= m_sprites.size();
+		}
+		else{
+			if(m_frame >= m_sprites.size()-1)
+				m_frame = m_sprites.size()-1;
+		}
 		m_t = 0.0f;
+	}
+}
+
+void
+Sprite::restart()
+{
+	m_frame = 0;
+}
+
+void
+Sprite::setLoop(bool loop)
+{
+	m_loop = loop;
+}
+
+void
+Sprite::setScale(float w, float h)
+{
+	BOOST_FOREACH(sf::Sprite *sprite, m_sprites){
+		sprite->setScale(m_scaling*w,m_scaling*h);
 	}
 }
