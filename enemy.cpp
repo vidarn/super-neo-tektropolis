@@ -47,6 +47,6 @@ Enemy::update(float dt)
 void
 Enemy::getBeamed(){
 	m_dead = true;
-	m_level->addActor(new Explosion(getX(), getY()-16, 10, 10, *m_world, m_spriteFactory, m_rng, m_level));
+	m_level->addActor(new Explosion(getX(), getY()-16, 10, 10, *m_world, m_spriteFactory, m_rng, m_level, "enemy", m_flipped));
 }
 

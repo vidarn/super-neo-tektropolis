@@ -9,14 +9,15 @@ class Sprite {
 	public:
 		Sprite (std::vector<sf::Texture *> textures);
 		virtual ~Sprite ();
-		void draw(Camera *cam, int x, int y);
+		void draw(Camera *cam, int x, int y, bool absolute = false);
 		void setBackground();
 		void setFlipped(bool state);
 		void update(float dt);
 		void restart();
 		void setLoop(bool loop);
 		void setScale(float w, float h);
-		int getFrame(){return m_frame;};
+		int  getFrame(){return m_frame;};
+		void setFrame(int f){m_frame = f;};
 	private:
 		std::vector<sf::Sprite  *> m_sprites;
 		int m_scaling;

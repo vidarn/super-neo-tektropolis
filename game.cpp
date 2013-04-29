@@ -19,7 +19,6 @@ Game::run()
 {
     start();
     m_clock.restart();
-    std::cout << "Hello world" << std::endl;
     while (m_window->isOpen())
     {
         sf::Time time = m_clock.getElapsedTime();
@@ -57,8 +56,10 @@ Game::input()
          if (event.type == sf::Event::KeyPressed){
              bool handled = false;
              switch(event.key.code){
-                 case sf::Keyboard::R:
-                     restart();
+                 case sf::Keyboard::Return:
+					 if(!m_level->m_valid){
+						 restart();
+					 }
                      handled = true;
                      break;
              }

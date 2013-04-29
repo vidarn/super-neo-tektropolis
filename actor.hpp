@@ -51,6 +51,7 @@ class Actor {
 		b2Body*   m_body;
 		bool m_dead;
 		bool m_deadly;
+		bool m_useless;
 	protected:
 		void drawActor(Camera *cam, Actor *act);
 		void drawActor(Camera *cam, Actor *act, int x, int y);

@@ -21,6 +21,8 @@ class FlyingEnemy:public Actor{
     private:
         b2Vec2 m_vel;
         float m_bulletCooldown;
+        float m_dirCooldown;
+        bool  m_flipped;
 };
 
 #endif /* end of include guard: FLYING_ENEMY_VPSSX0K7 */

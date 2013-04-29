@@ -12,7 +12,7 @@ class Camera {
 		Camera (Actor *target, sf::RenderWindow &window, boost::random::mt19937 *rng);
 		virtual ~Camera ();
 		void update(float dt);
-		void draw(sf::Sprite *sprite, int x, int y, int layer, int scaling);
+		void draw(sf::Sprite *sprite, int x, int y, int layer, int scaling, bool absolute);
 		void setShake(float shake);
 	private:
 		Actor *m_target;

@@ -7,23 +7,57 @@
 #include "decoration.hpp"
 #include "enemy.hpp"
 #include "flying_enemy.hpp"
+#include "orb.hpp"
 
 Level::Level(boost::random::mt19937 *rng, SpriteFactory *spriteFactory, sf::RenderWindow &window):
-	m_rng(rng), m_spriteFactory(spriteFactory), m_valid(true)
+	m_rng(rng), m_spriteFactory(spriteFactory), m_valid(true), m_score(0)
 {
 	b2Vec2 gravity(0.0f, 35.0f);
 	m_world = new b2World(gravity);
-	generate();
+    m_player = 0;
+    for(int x=-1;x<2;x++){
+        for(int y=-1;y<2;y++){
+            std::string chunkType = "easy";
+            if(x==0 && y==0){
+                chunkType = "start";
+            }
+            Chunk *chunk = new Chunk(x,y,this,m_rng,chunkType);
+            chunk->generate();
+            m_chunks.push_back(chunk);
+        }
+    }
+    m_valid = m_player != 0;
 	m_camera = new Camera(m_player, window, m_rng);
 	m_player->setCamera(m_camera);
 	m_contactListener = new ActorContactListener();
 	m_world->SetContactListener(m_contactListener);
+
+	std::vector<std::string> frames;
+	frames.push_back("number/00.png");
+	frames.push_back("number/01.png");
+	frames.push_back("number/02.png");
+	frames.push_back("number/03.png");
+	frames.push_back("number/04.png");
+	frames.push_back("number/05.png");
+	frames.push_back("number/06.png");
+	frames.push_back("number/07.png");
+	frames.push_back("number/08.png");
+	frames.push_back("number/09.png");
+    for(int i=0;i<5;i++){
+        m_numbers[i] = m_spriteFactory->getSprite(frames);
+    }
 }
 
 Level::~Level()
 {
+    BOOST_FOREACH(Chunk *chunk, m_chunks){
+        delete chunk;
+    }
     BOOST_FOREACH(Actor *actor, m_actors){
         delete actor;
+    }
+    for(int i=0;i<5;i++){
+        delete m_numbers[i];
     }
 	delete m_world;
 	delete m_camera;
@@ -42,6 +76,9 @@ Level::draw(sf::RenderWindow &window)
     BOOST_FOREACH(Actor *actor, m_actors){
 		actor->draw(m_camera);
 	}
+    for(int i=0;i<5;i++){
+        m_numbers[i]->draw(m_camera, 10+8*i, 10, true);
+    }
 }
 
 void
@@ -73,77 +110,67 @@ Level::update(float dt)
 		m_world->Step(dt, velocityIterations, positionIterations);
 	}
 	m_camera->update(dt);
-	cleanUpActors();
-}
 
-void
-Level::generate()
-{
-	for(int a=0;a<100;a++){
-		int x = boost::random::uniform_int_distribution<>(1,450)(*m_rng);
-		int y = boost::random::uniform_int_distribution<>(40,2050)(*m_rng);
-        int w = 1;
-        int h = 1;
-		double obstacleProbs[] = {
-			0.3, 0.7
-		};
-		int obstacleType = boost::random::discrete_distribution<>(obstacleProbs)(*m_rng);
-        Actor *obstacle;
-		switch(obstacleType){
-			case 0:
-                w = 85;
-                h = 30;
-				obstacle = new Obstacle(x,y,w,h,*m_world,m_spriteFactory,m_rng, this, "medium");
-				break;
-			case 1:
-                w = 160;
-                h = 30;
-				obstacle = new Obstacle(x,y,w,h,*m_world,m_spriteFactory,m_rng, this, "large");
-				break;
-		}
-        ObstacleIntersectionCallback callback(obstacle);
-        b2Vec2 tmp;
-        b2AABB bb = obstacle->getFixture()->GetAABB(0);
-        bb.lowerBound.y -= screenToWorld(h);
-        m_world->QueryAABB(&callback, bb);
-        if(callback.m_empty){
-            addActor(obstacle);
-            if( a == 0){
-                y -= 42;
-                m_player = new Player(x,y,15,39,*m_world,m_spriteFactory,m_rng, this);
-                addActor(m_player);
+
+    BOOST_FOREACH(Chunk *chunk, m_chunks){
+        chunk->m_useless = true;
+    }
+    int x = m_player->getX()/m_chunks[0]->m_w;
+    int y = m_player->getY()/m_chunks[0]->m_h;
+    std::vector<Chunk *>newChunks;
+    for(int yy=-2;yy<=1;yy++){
+        for(int xx=-2;xx<=1;xx++){
+            bool exists = false;
+            BOOST_FOREACH(Chunk *chunk, m_chunks){
+                if(chunk->m_iX == x+xx && chunk->m_iY == y+yy){
+                    exists = true;
+                    chunk->m_useless = false;
+                }
             }
-            else{
-                y -= 40;
-				double enemyProbs[] = {
-					0.0, 0.6, 0.4
-				};
-				int enemyType = boost::random::discrete_distribution<>(enemyProbs)(*m_rng);
-				Actor *enemy = 0;
-				switch(enemyType){
-					case 1:
-						x += boost::random::uniform_int_distribution<>(-w*0.5,w*0.5)(*m_rng);
-						enemy = new Enemy(x,y,17,37,*m_world,m_spriteFactory,m_rng, this);
-						break;
-					case 2:
-						enemy = new FlyingEnemy(x,y-40,17,37,*m_world,m_spriteFactory,m_rng, this);
-						break;
-				}
-                if(enemy){
-					addActor(enemy);
-				}
+            if(!exists){
+                Chunk *newChunk = new Chunk(x+xx,y+yy,this,m_rng,"standard");
+                newChunks.push_back(newChunk);
             }
+        }
+    }
+
+    BOOST_FOREACH(Actor *actor, m_actors){
+        actor->m_useless = true;
+    }
+    for(int i=m_chunks.size()-1;i>=0;i--){
+        Chunk *chunk = m_chunks[i];
+        if(chunk->m_useless){
+            m_chunks.erase(m_chunks.begin()+i);
+            delete chunk;
         }
         else{
-            delete obstacle;
+            BOOST_FOREACH(Actor *actor, m_actors){
+                if(chunk->actorInside(actor)){
+                    actor->m_useless = false;
+                }
+            }
         }
-	}
-	for(int a=0;a<15;a++){
-		int x = boost::random::uniform_int_distribution<>(1,950)(*m_rng);
-		int y = boost::random::uniform_int_distribution<>(40,950)(*m_rng);
-		addActor(new Decoration(x,y,85,30,*m_world,m_spriteFactory,"cloud",m_rng, this));
-	}
+    }
+    BOOST_FOREACH(Actor *actor, m_actors){
+        if(actor->m_useless){
+            actor->m_dead = true;
+        }
+    }
+
+    BOOST_FOREACH(Chunk *chunk, newChunks){
+        chunk->generate();
+        m_chunks.push_back(chunk);
+    }
+
+
 	cleanUpActors();
+    
+    int tmp = 1;
+    for(int i=4;i>=0;i--){
+        int val = (m_score/tmp)%10;
+        m_numbers[i]->setFrame(val);
+        tmp *= 10;
+    }
 }
 
 void
@@ -156,6 +183,13 @@ Level::keyPressed(int key)
 				break;
 		}
 	}
+}
+
+void
+Level::addScore(int amount)
+{
+    m_score += amount;
+    m_score = std::min(m_score,99999);
 }
 
 Actor *
@@ -172,6 +206,7 @@ Level::cleanUpActors()
 		if(actor->m_dead){
 			if(actor == m_player){
 				m_valid = false;
+                addActor(new Decoration(m_player->getX(),m_player->getY()-70,17,37,*m_world,m_spriteFactory, "restart", m_rng, this));
 			}
 			else{
 				m_actors.erase(m_actors.begin()+i);

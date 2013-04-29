@@ -8,6 +8,7 @@
 #include "camera.hpp"
 #include "player.hpp"
 #include "sprite_factory.hpp"
+#include "chunk.hpp"
 
 class ObstacleIntersectionCallback: public b2QueryCallback {
     public:
@@ -25,19 +26,23 @@ class Level {
 		void draw(sf::RenderWindow &window);
 		void update(float dt);
 		void keyPressed(int key);
-		Actor *getPlayer();
-	private:
-		void generate();
+		void addScore(int amount);
 		void cleanUpActors();
-        std::vector<Actor *> m_actors;
-        std::vector<Actor *> m_newActors;
+		Actor *getPlayer();
 		Player *m_player;
 		b2World *m_world;
-		boost::random::mt19937 *m_rng;
 		SpriteFactory *m_spriteFactory;
+		bool m_valid;
+	private:
+		void generate();
+        std::vector<Actor *> m_actors;
+        std::vector<Actor *> m_newActors;
+        std::vector<Chunk *> m_chunks;
+		Sprite *m_numbers[5];
+		boost::random::mt19937 *m_rng;
 		Camera *m_camera;
 		ActorContactListener *m_contactListener;
-		bool m_valid;
+		int m_score;
 };
 
 #endif /* end of include guard: LEVEL_ZR61NK6F */

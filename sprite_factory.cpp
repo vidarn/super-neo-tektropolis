@@ -29,7 +29,6 @@ SpriteFactory::getSprite(std::vector<std::string> names)
             tex = m_textures.at(name);
         }
         catch(std::out_of_range &oor){
-            std::cout << "loading " << name << std::endl;
             tex = new sf::Texture;
             tex->loadFromFile("data/sprites/" + name);
             m_textures[name] = tex;

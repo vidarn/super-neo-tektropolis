@@ -13,6 +13,9 @@ Decoration::Decoration(int x, int y, int w, int h, b2World &world, SpriteFactory
 		}
 		m_sprite->setBackground();
 	}
+	if(name == "restart"){
+		m_sprite = m_spriteFactory->getSprite("number/restart.png");
+	}
 }
 
 Decoration::~Decoration()

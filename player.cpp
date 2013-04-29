@@ -10,7 +10,11 @@ Player::Player(int x, int y, int w, int h, b2World &world, SpriteFactory *sprite
 	m_jumpPressed = m_beginJump = false;
 	m_shooting = false;
 	m_onGround = m_flipped = false;
-	m_idleSprite = m_spriteFactory->getSprite("player/standing.png");
+	m_idleSprite                = m_spriteFactory->getSprite("player/standing.png");
+	m_jumpingUpSprite           = m_spriteFactory->getSprite("player/jumping_up.png");
+	m_jumpingDownSprite         = m_spriteFactory->getSprite("player/jumping_down.png");
+	m_jumpingStraightUpSprite   = m_spriteFactory->getSprite("player/jump_straight.png");
+	m_jumpingStraightDownSprite = m_spriteFactory->getSprite("player/standing.png");
 	std::vector<std::string> runningFrames;
 	runningFrames.push_back("player/running01.png");
 	runningFrames.push_back("player/running02.png");
@@ -133,6 +137,24 @@ Player::update(float dt)
 			}
 		}
 	}
+    if(!m_onGround){
+        if(vel.y < 0.0f){
+            if(m_walkingLeft || m_walkingRight){
+                m_sprite = m_jumpingUpSprite;
+            }
+            else{
+                m_sprite = m_jumpingStraightUpSprite;
+            }
+        }
+        else{
+            if(m_walkingLeft || m_walkingRight){
+                m_sprite = m_jumpingDownSprite;
+            }
+            else{
+                m_sprite = m_jumpingStraightDownSprite;
+            }
+        }
+    }
 	if(m_dead){
 		m_sprite = m_dyingSprite;
 	}

@@ -29,9 +29,9 @@ Sprite::~Sprite()
 }
 
 void
-Sprite::draw(Camera *cam, int x, int y)
+Sprite::draw(Camera *cam, int x, int y, bool absolute)
 {
-	cam->draw(m_sprites[m_frame], x, y, m_layer, m_scaling);
+	cam->draw(m_sprites[m_frame], x, y, m_layer, m_scaling, absolute);
 }
 
 void

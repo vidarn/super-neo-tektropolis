@@ -34,6 +34,10 @@ class Player : public Actor {
 		bool m_onGround;
 		bool m_flipped;
 		Sprite *m_idleSprite;
+		Sprite *m_jumpingUpSprite;
+		Sprite *m_jumpingDownSprite;
+		Sprite *m_jumpingStraightUpSprite;
+		Sprite *m_jumpingStraightDownSprite;
 		Sprite *m_runningSprite;
 		Sprite *m_shootingSprite;
 		Sprite *m_dyingSprite;

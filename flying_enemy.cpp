@@ -7,11 +7,18 @@
 FlyingEnemy::FlyingEnemy(int x, int y, int w, int h, b2World &world, SpriteFactory *spriteFactory, boost::random::mt19937 *rng, Level *level):
 	Actor(x,y,w,h,ACTOR_DYNAMIC,world, spriteFactory, rng, level)
 {
-	m_sprite = m_spriteFactory->getSprite("enemy/enemy03.png");
-    m_deadly = true;
-    m_vel.x = 0.0f;
-    m_vel.y = 0.0f;
+	std::vector<std::string> frames;
+	frames.push_back("flying_enemy/enemy01.png");
+	frames.push_back("flying_enemy/enemy02.png");
+	frames.push_back("flying_enemy/enemy03.png");
+	frames.push_back("flying_enemy/enemy04.png");
+	m_sprite         = m_spriteFactory->getSprite(frames);
+    m_deadly         = true;
+    m_vel.x          = 0.0f;
+    m_vel.y          = 0.0f;
     m_bulletCooldown = 0.0f;
+    m_dirCooldown    = 0.0f;
+    m_flipped        = false;
 }
 
 FlyingEnemy::~FlyingEnemy()
@@ -21,13 +28,17 @@ FlyingEnemy::~FlyingEnemy()
 void
 FlyingEnemy::update(float dt)
 {
-    boost::uniform_real<float> velDist(-1.0f,1.0f);
-    b2Vec2 dVel;
-    dVel.x = velDist(*m_rng);
-    dVel.y = velDist(*m_rng);
-    m_vel += 0.3 * dVel;
-    m_vel.Normalize();
+    if(m_dirCooldown <= 0.0f){
+        boost::uniform_real<float> velDist(-1.0f,1.0f);
+        b2Vec2 dVel;
+        dVel.x = velDist(*m_rng);
+        dVel.y = velDist(*m_rng);
+        m_vel += 0.3 * dVel;
+        m_vel.Normalize();
+        m_dirCooldown = 1.0f;
+    }
     m_body->SetLinearVelocity(m_vel);
+    m_flipped = m_vel.x > 0.0f;
 
     if(m_bulletCooldown <= 0.0f){
         Actor *player = m_level->getPlayer();
@@ -41,19 +52,22 @@ FlyingEnemy::update(float dt)
         LOSCallback callback(player);
         m_world->RayCast(&callback, point1, point2);
         if(!callback.m_blocked){
-            m_sprite->setFlipped(dx > 0);
-            m_level->addActor(new Bullet(getX(), getY()-16, 3, 3, *m_world, m_spriteFactory, m_rng, m_level, vel));
+            m_flipped = dx > 0;
+            m_level->addActor(new Bullet(getX(), getY()+6, 3, 3, *m_world, m_spriteFactory, m_rng, m_level, vel));
             m_bulletCooldown = 2.0f;
         }
     }
 
     m_bulletCooldown = std::max(0.0f, m_bulletCooldown - dt);
+    m_dirCooldown    = std::max(0.0f, m_dirCooldown - dt);
+    m_sprite->setFlipped(m_flipped);
+	m_sprite->update(dt);
 }
 
 void
 FlyingEnemy::getBeamed(){
 	m_dead = true;
-	m_level->addActor(new Explosion(getX(), getY()-16, 10, 10, *m_world, m_spriteFactory, m_rng, m_level));
+	m_level->addActor(new Explosion(getX(), getY()-16, 20, 0, *m_world, m_spriteFactory, m_rng, m_level, "flying enemy", m_flipped));
 }
 
 void

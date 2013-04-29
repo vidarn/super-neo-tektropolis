@@ -38,13 +38,17 @@ Camera::update(float dt)
 }
 
 void
-Camera::draw(sf::Sprite *sprite, int x, int y, int layer, int scaling)
+Camera::draw(sf::Sprite *sprite, int x, int y, int layer, int scaling, bool absolute)
 {
-	int offsetX = 200 - m_x + m_shakeX;
-	int offsetY = 150 + m_y + m_shakeY;
-	if(layer == LAYER_BACKGROUND){
-		offsetX = offsetX*0.5;
-		offsetY = offsetY*0.5;
+	int offsetX = 0;
+	int offsetY = 0;
+	if(!absolute){
+		offsetX = 200 - m_x + m_shakeX;
+		offsetY = 150 + m_y + m_shakeY;
+		if(layer == LAYER_BACKGROUND){
+			offsetX = offsetX*0.5;
+			offsetY = offsetY*0.5;
+		}
 	}
 	sprite->setPosition((x + offsetX)*scaling, (y + offsetY)*scaling);
 	m_window.draw(*sprite);
